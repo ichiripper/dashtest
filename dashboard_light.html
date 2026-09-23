@@ -12,8 +12,6 @@
       --color-primary-600: #0079ab;
       --color-muted-deep: #7a8499;
       --color-white: #fff;
-      --dialog-overlay: rgba(15, 23, 43, 0.28);
-      --dialog-overlay-blur: 2px;
       --btn-link-info-fg: var(--color-link);
       --btn-link-info-fg-hover: var(--color-primary-400);
       --btn-link-info-fg-active: var(--color-primary-600);
@@ -21,8 +19,6 @@
       --text-base: 16px;
       --weight-medium: 500;
       --space-xs: 6px;
-      --space-6: 24px;
-      --radius-md: 10px;
       --bg: #f4f6f9;
     }
 
@@ -82,81 +78,6 @@
     .contract__switch-place-text--link:active {
       color: var(--btn-link-info-fg-active);
     }
-
-    .contract-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 60;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-6);
-      background: var(--dialog-overlay);
-      backdrop-filter: blur(var(--dialog-overlay-blur));
-    }
-
-    .contract-modal[hidden] {
-      display: none;
-    }
-
-    .contract-modal__card {
-      width: min(96vw, 900px);
-      max-height: min(92vh, 760px);
-      overflow: hidden;
-      padding: 20px 24px 24px;
-      border-radius: 24px;
-      background: var(--color-white);
-      box-shadow: 0 8px 28px rgba(49, 65, 88, 0.12), 0 2px 8px rgba(49, 65, 88, 0.06);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      box-sizing: border-box;
-    }
-
-    .contract-modal__head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-
-    .contract-modal__title {
-      margin: 0;
-      font-size: 18px;
-      line-height: 1.3;
-      font-weight: 600;
-      color: #2e293d;
-    }
-
-    .contract-modal__close {
-      border: 0;
-      background: transparent;
-      font-size: 28px;
-      line-height: 1;
-      color: var(--color-muted-deep);
-      cursor: pointer;
-      padding: 0 4px;
-    }
-
-    .contract-modal__body {
-      display: flex;
-      flex-direction: column;
-      flex: 1 1 auto;
-      min-width: 0;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    .contract-modal__iframe {
-      display: block;
-      width: 100%;
-      flex: 1 1 auto;
-      min-height: min(68vh, 640px);
-      border: 0;
-      border-radius: var(--radius-md);
-      background: var(--color-white);
-    }
   </style>
 </head>
 <body>
@@ -173,53 +94,44 @@
     </div>
   </main>
 
-  <div id="modal" class="contract-modal" hidden>
-    <div class="contract-modal__card">
-      <div class="contract-modal__head">
-        <h2 class="contract-modal__title">Карта Userside</h2>
-        <button id="closeBtn" class="contract-modal__close" type="button" aria-label="Закрыть">×</button>
-      </div>
-      <div class="contract-modal__body">
-        <iframe
-          id="mapFrame"
-          class="contract-modal__iframe"
-          sandbox="allow-scripts allow-forms"
-          title="Карта Userside"
-        ></iframe>
-      </div>
-    </div>
-  </div>
-
   <script>
     (function () {
       var MAP_URL = 'https://userside.r-line.ru/map/show?embed=1&no_header=1&opt_wnode_4=1&by_node=557&is_show_center_marker=1@42.982561,47.461361,18z';
-
       var openLink = document.getElementById('openLink');
-      var closeBtn = document.getElementById('closeBtn');
-      var modal = document.getElementById('modal');
-      var frame = document.getElementById('mapFrame');
 
-      function openModal(e) {
+      function openMapPopup(e) {
         if (e) e.preventDefault();
         var url = (MAP_URL || '').trim();
         if (!url) return;
-        frame.src = url;
-        modal.hidden = false;
+
+        // Размеры окна
+        var width = 1000;
+        var height = 720;
+
+        // Центрирование окна относительно экрана пользователя
+        var left = (window.screen.width - width) / 2;
+        var top = (window.screen.height - height) / 2;
+
+        var popupFeatures = [
+          'width=' + width,
+          'height=' + height,
+          'top=' + top,
+          'left=' + left,
+          'resizable=yes',
+          'scrollbars=yes',
+          'status=no',
+          'toolbar=no',
+          'menubar=no',
+          'location=no'
+        ].join(',');
+
+        var popup = window.open(url, 'UsersideMapPopup', popupFeatures);
+        if (popup) {
+          popup.focus();
+        }
       }
 
-      function closeModal() {
-        modal.hidden = true;
-        frame.src = 'about:blank';
-      }
-
-      openLink.addEventListener('click', openModal);
-      closeBtn.addEventListener('click', closeModal);
-      modal.addEventListener('click', function (e) {
-        if (e.target === modal) closeModal();
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && !modal.hidden) closeModal();
-      });
+      openLink.addEventListener('click', openMapPopup);
     })();
   </script>
 </body>
